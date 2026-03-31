@@ -1,5 +1,36 @@
 # MLWeather
 
+Project to predict the temperature in Seville. The structure of the project is (not in its final form):
+
+```
+MLWeather/
+│
+├── app.py                          # Streamlit app
+├── data/
+│   ├── historic_data.csv           # Historic data of weather
+│   └── forecast_data.csv           # Forecast data
+|
+├── notebooks/
+│   ├── forecast_analysis.ipynb     # Analysis of forecast data
+|   └── historic_analysis.ipynb     # Analysis of historic data
+|
+├── models/
+│   ├── base_model.py               # Common to all the models: reading and treatment of data, fit and predict...
+│   ├── linear_model.py             # Linear Regression + lags
+│   ├── xgboost_model.py            # XGBoost
+│   ├── random_forest.py            # Random Forest
+│   ├── sarima_model.py             # SARIMA
+│   └── lstm_model.py               # LSTM
+│
+├── evaluation/
+│   └── metrics.py                  # MAE, RMSE, MAPE...
+│
+└── ui/
+    ├── sidebar.py                  # Model selection, parameters...
+    ├── charts.py                   # Graphics
+    └── comparison.py               # Comparative tables
+```
+
 ## Getting the Data
 
 The Data is getting from [Open-Meteo](https://open-meteo.com/). In the [_Available APIs_](https://open-meteo.com/en/features#available_apis) section we can get:
