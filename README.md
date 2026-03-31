@@ -31,6 +31,12 @@ MLWeather/
     └── comparison.py               # Comparative tables
 ```
 
+## Run Streamlit
+
+```
+streamlit run app.py
+```
+
 ## Getting the Data
 
 The Data is getting from [Open-Meteo](https://open-meteo.com/). In the [_Available APIs_](https://open-meteo.com/en/features#available_apis) section we can get:
