@@ -5,17 +5,27 @@ Project to predict the temperature in Seville. The structure of the project is (
 ```
 MLWeather/
 │
+├── README.md
+├── requirements.txt                # Libraries and versions
+├── .gitignore
+├── .python-version
+|
 ├── app.py                          # Streamlit app
+|
 ├── data/
 │   ├── historic_data.csv           # Historic data of weather
 │   └── forecast_data.csv           # Forecast data
 |
-├── notebooks/
+├── notebooks/                      # Study of data and models...
 │   ├── forecast_analysis.ipynb     # Analysis of forecast data
 |   └── historic_analysis.ipynb     # Analysis of historic data
 |
+├── src/
+|   ├── data_treatment.py           # Reading, treatment, preprocessing... 
+|   ├── forecast_data.py            # Forecast data collection
+|   └── historic_data.py            # Historic data collection
+|
 ├── models/
-│   ├── base_model.py               # Common to all the models: reading and treatment of data, fit and predict...
 │   ├── linear_model.py             # Linear Regression + lags
 │   ├── xgboost_model.py            # XGBoost
 │   ├── random_forest.py            # Random Forest
@@ -23,7 +33,7 @@ MLWeather/
 │   └── lstm_model.py               # LSTM
 │
 ├── evaluation/
-│   └── metrics.py                  # MAE, RMSE, MAPE...
+│   └── metrics.py                  # MAE, RMSE...
 │
 └── ui/
     ├── sidebar.py                  # Model selection, parameters...
