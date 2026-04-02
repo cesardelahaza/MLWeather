@@ -1,3 +1,4 @@
 .cache.sqlite
 .vscode
 .DS_Store
+__pycache__

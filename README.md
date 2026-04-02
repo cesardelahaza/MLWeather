@@ -13,8 +13,11 @@ MLWeather/
 ├── app.py                          # Streamlit app
 |
 ├── data/
+│   ├── predictions/                # Where prediction data goes
+│   ├── forecast_data.csv           # Forecast data
 │   ├── historic_data.csv           # Historic data of weather
-│   └── forecast_data.csv           # Forecast data
+|   ├── treated_forecast_data.csv   # Processed forecast data
+|   └── treated_historic_data.csv   # Processed historic data
 |
 ├── notebooks/                      # Study of data and models...
 │   ├── forecast_analysis.ipynb     # Analysis of forecast data
@@ -32,6 +35,13 @@ MLWeather/
 │   ├── sarima_model.py             # SARIMA
 │   └── lstm_model.py               # LSTM
 │
+├── notes/
+│   ├── linear_model.md             # Notes on Linear Regression
+│   ├── xgboost_model.md            # Notes on XGBoost
+│   ├── random_forest.md            # Notes on Random Forest
+│   ├── sarima_model.md             # Notes on SARIMA
+│   └── lstm_model.md               # Notes on LSTM
+│
 ├── evaluation/
 │   └── metrics.py                  # MAE, RMSE...
 │
@@ -41,7 +51,8 @@ MLWeather/
     └── comparison.py               # Comparative tables
 ```
 
-## Run Streamlit
+## Run Streamlit
+How to run this app:
 
 ```
 streamlit run app.py

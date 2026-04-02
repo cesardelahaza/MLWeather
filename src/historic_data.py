@@ -3,8 +3,15 @@ import openmeteo_requests
 import pandas as pd
 import requests_cache
 from retry_requests import retry
+from datetime import datetime, timedelta
 
 import os
+
+# Set date
+todays = datetime.today()
+print(f"Yesterday was {todays}")
+two_weeks_before = todays - timedelta(weeks=2)
+print(f"Two weeks before was {two_weeks_before}")
 
 # Setup the Open-Meteo API client with cache and retry on error
 cache_session = requests_cache.CachedSession('.cache', expire_after = -1)
@@ -17,8 +24,8 @@ url = "https://archive-api.open-meteo.com/v1/archive"
 params = {
 	"latitude": [37.3828, 36.5267, 37.2664, 36.7202, 37.8916, 38.8779, 38.7167, 38.9863],
 	"longitude": [-5.9732, -6.2891, -6.94, -4.4203, -4.7728, -6.9706, -9.1333, -3.9291],
-	"start_date": "2026-03-14",
-	"end_date": "2026-03-29",
+	"start_date": two_weeks_before.strftime('%Y-%m-%d'),
+	"end_date": todays.strftime('%Y-%m-%d'),
 	"hourly": ["temperature_2m", "relative_humidity_2m", "dew_point_2m", "apparent_temperature", "precipitation", "rain", "snowfall", "snow_depth", "weather_code", "pressure_msl", "surface_pressure", "cloud_cover", "cloud_cover_low", "cloud_cover_mid", "cloud_cover_high", "et0_fao_evapotranspiration", "vapour_pressure_deficit", "wind_speed_10m", "wind_speed_100m", "wind_direction_10m", "wind_direction_100m", "wind_gusts_10m", "soil_temperature_0_to_7cm", "soil_temperature_7_to_28cm", "soil_temperature_28_to_100cm", "soil_temperature_100_to_255cm", "soil_moisture_0_to_7cm", "soil_moisture_7_to_28cm", "soil_moisture_28_to_100cm", "soil_moisture_100_to_255cm"],
 	"timezone": "Europe/Berlin",
 }

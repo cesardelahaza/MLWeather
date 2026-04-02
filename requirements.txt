@@ -10,5 +10,6 @@ scikit-learn==1.7.1
 tensorflow==2.16.2
 xgboost==3.2.0
 streamlit==1.55.0
+datetime==6.0
 os
 
