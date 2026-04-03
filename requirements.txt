@@ -11,5 +11,7 @@ tensorflow==2.16.2
 xgboost==3.2.0
 streamlit==1.55.0
 datetime==6.0
-os
-
+statsmodels==0.14.6
+pmdarima==2.1.1
+folium==0.20.0
+streamlit_folium==0.27.1

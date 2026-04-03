@@ -8,6 +8,8 @@ from sklearn.linear_model import LinearRegression
 from evaluation.metrics import save_metrics
 from datetime import date
 
+import joblib
+
 def linear_model(target):
     """
     Build linear model with the historic data as train data
@@ -19,9 +21,12 @@ def linear_model(target):
     X_train = data.drop(columns=['date', target])
     y_train = data[target]
     
-    print("Building the model with the data...")
+    print("Building linear model with the data...")
     lr_model = LinearRegression()
     lr_model.fit(X_train, y_train)
+
+    print("Saving linear model parameters information...")
+    joblib.dump(lr_model, 'models/linear_model_info.pkl')
     
     return lr_model, X_train, y_train, data['date']
 
@@ -43,7 +48,7 @@ def main():
 
     X_test, y_test, dates = forecast_data("temperature_2m_seville")
 
-    print("Predicting values...")
+    print("Predicting values with Linear Regression Model...")
     y_pred = lr_model.predict(X_test)
 
     print("Saving predictions to data/predictions/linear_model_predictions.csv")
@@ -53,14 +58,14 @@ def main():
                             'residuals': y_test - y_pred})
     pred_df.to_csv('data/predictions/linear_model_predictions.csv')
 
-    print("Saving metrics of linear model")
+    print("Saving metrics of linear model into evaluation/metrics.json")
 
     save_metrics(
         model_name='linear_model',
         y_test=y_test,
         y_pred=y_pred,
         extra_info={"trained_at": str(date.today()),
-                    "coefficients": lr_model.coef_.tolist(),
+                    "importance": lr_model.coef_.tolist(),
                     "features": X_train.columns.tolist()}
     )
 

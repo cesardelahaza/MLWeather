@@ -1,12 +1,24 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
+
+import folium
+from streamlit_folium import st_folium
 
 import json
 
+import ui.charts as charts
+
 # Page configuration
 st.set_page_config(page_title="MLWeather", layout="wide")
+
+@st.cache_data
+def load_data():
+    historic = pd.read_csv("data/treated_historic_data.csv")
+    forecast = pd.read_csv("data/treated_forecast_data.csv")
+    historic['d_type'] = 'Historic'
+    forecast['d_type'] = 'Forecast'
+    return pd.concat([historic, forecast])
 
 # --- Sidebar (lateral menu) ---
 with st.sidebar:
@@ -25,88 +37,67 @@ with st.sidebar:
 st.title("MLWeather")
 
 if page == "Home":
-    st.header("Welcome 👋")
-    st.write("Add map of Seville...")
+    st.subheader('ML Project to predict temperatures in Seville')
+    m = folium.Map(location=[37.39, -5.99], zoom_start=12)  
+    folium.Marker([37.39, -5.99], popup="Seville", tooltip='Seville').add_to(m)
+    st_folium(m, use_container_width=True, height=400)
 
-elif page == "Visualizations":
-    st.header("Visualization of Data")
+if page == "Visualizations":
+    st.header("The Weather in Seville")
 
     # Load CSV
     df = pd.read_csv("data/treated_historic_data.csv")
     
     tab_sev, tab_all = st.tabs(["Seville", "All the locations"])
     
-    historic_df = pd.read_csv("data/treated_historic_data.csv")
-    forecast_df = pd.read_csv("data/treated_forecast_data.csv")
-
-    historic_df['d_type'] = 'Historic'
-    forecast_df['d_type'] = 'Forecast'
-    df_combined = pd.concat([historic_df, forecast_df])
+    df_combined = load_data()
     
     with tab_sev:
         # Variables in Seville
-        fig_temp_sev = px.line(df_combined, x='date', y='temperature_2m_seville',
-                               title= 'Temperature in Seville', color='d_type',
-                               color_discrete_map={"Historic": "blue", "Forecast": "red"},
-                               labels={
-                                   'date': 'Date',
-                                   'temperature_2m_seville': 'Temperature (ºC)',
-                                   'd_type': ''
-                                   })
-        st.plotly_chart(fig_temp_sev)
+        col1_temp_sev, col2_boxs_sev = st.columns([1,1])
+        with col1_temp_sev:
+            st.plotly_chart(charts.line_chart(df_combined, 'temperature_2m_seville', 
+                                            'Temperature in Seville', 'Temperature (ºC)'))
+        with col2_boxs_sev:
+            
+            f = px.box(df_combined, x='hour', y='temperature_2m_seville',
+                   title='Temperature boxplots for each hour', color='d_type',
+                   color_discrete_map={"Historic": "blue", "Forecast": "red"},
+                   labels={'hour': 'Hour',
+                           'temperature_2m_seville': 'Temperature (ºC)',
+                           'd_type': ''})
+            
+            st.plotly_chart(f)
         
         col1_prec_sev, col2_prec_sev = st.columns([1,1])
         with col1_prec_sev:
-            fig_prec_sev = px.line(df_combined, x='date', y='precipitation_seville',
-                                   title='Precipitation in Seville', color='d_type',
-                                   color_discrete_map={"Historic": "blue", "Forecast": "red"},
-                                   labels={
-                                       'date': 'Date',
-                                       'precipitation_seville': 'Precipitation',
-                                       'd_type': ''
-                                       })
-            st.plotly_chart(fig_prec_sev)
+            st.plotly_chart(charts.line_chart(df_combined, 'precipitation_seville', 
+                                              'Precipitation in Seville', 'Precipitation'))
         with col2_prec_sev:
             fig_viol_sev = px.violin(df_combined, y='cloud_cover_seville', points='all', box=True,
                                      title='Cloud cover in Seville', color='d_type',
                                      color_discrete_map={"Historic": "blue", "Forecast": "red"},
-                                     labels={
-                                         'date': 'Date',
-                                         'cloud_cover_seville': 'Cloud cover (%)',
-                                         'd_type': ''
-                                   })
+                                     labels={'date': 'Date',
+                                             'cloud_cover_seville': 'Cloud cover (%)',
+                                             'd_type': ''})
             st.plotly_chart(fig_viol_sev)
         
         col1_pres_sev, col2_humi_sev, col3_wind_sev = st.columns(3)
         with col1_pres_sev:
-            fig_pres_sev = px.line(df_combined, x='date', y='pressure_msl_seville',
-                                   title='Pressure in Sevilla', color='d_type',
-                                   color_discrete_map={"Historic": "blue", "Forecast": "red"},
-                                   labels={
-                                       'date': 'Date',
-                                       'pressure_msl_seville': 'Pressure',
-                                       'd_type': ''
-                                       })
-            st.plotly_chart(fig_pres_sev)
+            st.plotly_chart(charts.line_chart(df_combined, 'pressure_msl_seville', 
+                                              'Pressure in Seville', 'Pressure'))
+        
         with col2_humi_sev:
-            fig_humi_sev = px.line(df_combined, x='date', y='relative_humidity_2m_seville',
-                                   title='Relative humidity in Sevilla', color='d_type',
-                                   color_discrete_map={"Historic": "blue", "Forecast": "red"},
-                                   labels={
-                                       'date': 'Date',
-                                       'relative_humidity_2m_seville': 'Humidity',
-                                       'd_type': ''
-                                       })
-            st.plotly_chart(fig_humi_sev)
+            st.plotly_chart(charts.line_chart(df_combined, 'relative_humidity_2m_seville', 
+                                              'Relative humidity in Seville', 'Humidity'))
+        
         with col3_wind_sev:
             fig_wind_sev = px.scatter_polar(df_combined, 
                                             r="wind_speed_10m_seville", theta="wind_direction_10m_seville", 
                                             color="d_type", opacity=0.5,
                                             title='Wind speed and direction',
                                             color_discrete_map={"Historic": "blue", "Forecast": "red"},
-                                            labels={
-                                                'd_type': ''
-                                                })
+                                            labels={'d_type': ''})
             st.plotly_chart(fig_wind_sev)
         
     with tab_all:
@@ -153,104 +144,59 @@ elif page == "Visualizations":
                                     'wind_speed_10m': 'Wind speed'
                                     })
                                 
-        
         fig_map.update_layout(mapbox_style="carto-positron")
         st.plotly_chart(fig_map, use_container_width=True)
-  
 
 elif page == "Predictions":
     st.header("Predictions")
 
     # --- Model selector ---
     models = {'Linear model': 'linear_model', 
-              'XGBoost model': 'xgb_model'} 
+              'XGBoost model': 'xgboost_model',
+              'Random Forest model': 'random_forest_model',
+              'SARIMA model': 'sarima_model',
+              'LSTM model': 'lstm_model'} 
     
     model = st.selectbox("Choose model from the list...", list(models.keys()))
+    
     metrics = json.loads(open('evaluation/metrics.json').read())
 
-    if models[model]=='linear_model':
-        lr_metrics = metrics[models[model]]
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            mae = lr_metrics['mae']
-            st.markdown(f"""
-                        <div style='text-align: center; padding: 1rem; background: #f0f2f6; border-radius: 8px'>
-                        <div style='font-size: 0.85rem; color: gray'>MAE</div>
-                        <div style='font-size: 1.8rem; font-weight: bold'>{mae}</div>
-                        </div>
-                        """, 
-                        unsafe_allow_html=True)
-        with col2:
-            rmse = lr_metrics['rmse']
-            st.markdown(f"""
-                        <div style='text-align: center; padding: 1rem; background: #f0f2f6; border-radius: 8px'>
-                        <div style='font-size: 0.85rem; color: gray'>RMSE</div>
-                        <div style='font-size: 1.8rem; font-weight: bold'>{rmse}</div>
-                        </div>
-                        """, 
-                        unsafe_allow_html=True)
-        with col3:
-            r2 = lr_metrics['r2']
-            st.markdown(f"""
-                        <div style='text-align: center; padding: 1rem; background: #f0f2f6; border-radius: 8px'>
-                        <div style='font-size: 0.85rem; color: gray'>R2</div>
-                        <div style='font-size: 1.8rem; font-weight: bold'>{r2}</div>
-                        </div>
-                        """, 
-                        unsafe_allow_html=True)
+    labels = {'mae': 'MAE', 'rmse': 'RMSE', 'r2': 'R²'}
 
-        lr_data = pd.read_csv('data/predictions/linear_model_predictions.csv', index_col=0)
-
-        # Real and predicted in same plot
-        fig1 = px.line(lr_data, x='date', y=['target', 'y_pred'], 
-                   title=model + ' predictions',
-                   labels={
-                       'date': 'Date',
-                       'value': 'Temperature',
-                       'variable': 'Legend'
-                       })
-        fig1.for_each_trace(lambda trace: trace.update(name=trace.name.replace("target", "Real").replace("y_pred", "Predicted")))
-        st.plotly_chart(fig1)  
+    model_metrics = metrics[models[model]]
+    cols = st.columns(len(labels))
+    for col, key in zip(cols, model_metrics):
+        with col:
+            st.markdown(f"""
+                <div style='text-align: center; padding: 1rem; background: #f0f2f6; border-radius: 8px'>
+                <div style='font-size: 0.85rem; color: gray'>{labels[key]}</div>
+                <div style='font-size: 1.8rem; font-weight: bold'>{model_metrics[key]}</div>
+                </div>
+            """, unsafe_allow_html=True)
         
-        # Most important coefficients of the model
-        coefs = pd.Series(lr_metrics['coefficients'], index=lr_metrics['features'])
+    model_data = pd.read_csv('data/predictions/' + models[model] + '_predictions.csv', index_col=0)
+
+    # Real and predicted in same plot
+    st.plotly_chart(charts.model_predictions(model_data, model))
+
+    # Most important features of the model
+    if model not in ['SARIMA model', 'LSTM model']:
+        coefs = pd.Series(model_metrics['importance'], index=model_metrics['features'])
         top_coefs = coefs.abs().nlargest(15).sort_values()
 
-        fig = px.bar(
-            x=top_coefs.values,
-            y=top_coefs.index,
-            orientation='h',
-            title='Top 15 most important coefficients (Linear Regression)',
-            labels={'x': 'Absolute coefficient', 'y': 'Feature'}
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(charts.most_imp_feats(top_coefs, model), use_container_width=True)
 
-        # Scatterplot predicted vs real | Residuals
-        col1_vs, col2_res = st.columns(2)
-        with col1_vs:
+    # Scatterplot predicted vs real | Residuals
+    col1_vs, col2_res = st.columns(2)
+    with col1_vs:
 
-            fig = px.scatter(lr_data, x='target', y='y_pred',
-                             title='Predicted vs Real temperature (Linear Regression)',
-                             labels={'target': 'Real (°C)', 
-                                     'y_pred': 'Predicted (°C)'})
+        st.plotly_chart(charts.pred_vs_real(model_data, model), use_container_width=True)
 
-            fig.add_shape(type='line',
-                          x0=lr_data['target'].min(),
-                          y0=lr_data['target'].min(),
-                          x1=lr_data['target'].max(),
-                          y1=lr_data['target'].max(),
-                          line=dict(color='red', dash='dash'))
-            
-            st.plotly_chart(fig, use_container_width=True)
+    with col2_res:
 
-        with col2_res:
-            fig = px.line(lr_data, x='date', y='residuals',
-                          title='Residuals (Linear Regression)',
-                          labels={'date': 'Date',
-                                  'residuals': 'Residuals'})
-            fig.add_hline(y=0, line=dict(color='red', dash='dash'))
-
-            st.plotly_chart(fig, use_container_width=True)
-
-        # Show dataframe of predictions
-        st.dataframe(lr_data)
+        st.plotly_chart(charts.residuals(model_data,model), use_container_width=True)
+    
+    # Show dataframe of predictions
+    st.markdown('---')
+    st.subheader(f'Data obtained from the {model}')
+    st.dataframe(model_data)
