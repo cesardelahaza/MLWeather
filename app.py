@@ -9,8 +9,19 @@ import json
 
 import ui.charts as charts
 
+import plotly.graph_objects as go
+
 # Page configuration
 st.set_page_config(page_title="MLWeather", layout="wide")
+
+color_themes = {
+    "Cold / Warm":      {"historical": "#4A90D9", "forecast": "#E8604C"},
+    "Ocean / Sand":     {"historical": "#1883BD", "forecast": "#EEC357"},
+    "Forest / Sunset":  {"historical": "#2F855E", "forecast": "#E77C51"},
+    "Purple / Lime":    {"historical": "#8B4ED1", "forecast": "#C7D832"},
+    "Night / Aurora":   {"historical": "#0D7898", "forecast": "#c7c9f4"},
+    "Minimalist":       {"historical": "#6B7280", "forecast": "#111827"},
+}
 
 @st.cache_data
 def load_data():
@@ -43,12 +54,18 @@ if page == "Home":
     st_folium(m, use_container_width=True, height=400)
 
 if page == "Visualizations":
-    st.header("The Weather in Seville")
+    c1, c2 = st.columns([3,1])
+    with c1:
+        st.header("The Weather in Seville")
+
+    with c2:
+        theme = st.selectbox("Color palette", list(color_themes.keys()))
+        colors = color_themes[theme]
 
     # Load CSV
     df = pd.read_csv("data/treated_historic_data.csv")
     
-    tab_sev, tab_all = st.tabs(["Seville", "All the locations"])
+    tab_sev, tab_all, tab_data = st.tabs(["Seville", "All the locations", "About the Data"])
     
     df_combined = load_data()
     
@@ -57,12 +74,12 @@ if page == "Visualizations":
         col1_temp_sev, col2_boxs_sev = st.columns([1,1])
         with col1_temp_sev:
             st.plotly_chart(charts.line_chart(df_combined, 'temperature_2m_seville', 
-                                            'Temperature in Seville', 'Temperature (ºC)'))
+                                            'Temperature in Seville', 'Temperature (ºC)', colors))
         with col2_boxs_sev:
             
             f = px.box(df_combined, x='hour', y='temperature_2m_seville',
                    title='Temperature boxplots for each hour', color='d_type',
-                   color_discrete_map={"Historic": "blue", "Forecast": "red"},
+                   color_discrete_map={"Historic": colors['historical'], "Forecast": colors['forecast']},
                    labels={'hour': 'Hour',
                            'temperature_2m_seville': 'Temperature (ºC)',
                            'd_type': ''})
@@ -72,11 +89,12 @@ if page == "Visualizations":
         col1_prec_sev, col2_prec_sev = st.columns([1,1])
         with col1_prec_sev:
             st.plotly_chart(charts.line_chart(df_combined, 'precipitation_seville', 
-                                              'Precipitation in Seville', 'Precipitation'))
+                                              'Precipitation in Seville', 'Precipitation', colors))
         with col2_prec_sev:
             fig_viol_sev = px.violin(df_combined, y='cloud_cover_seville', points='all', box=True,
                                      title='Cloud cover in Seville', color='d_type',
-                                     color_discrete_map={"Historic": "blue", "Forecast": "red"},
+                                     color_discrete_map={"Historic": colors['historical'], "Forecast": colors['forecast']},
+                                     hover_data='date', 
                                      labels={'date': 'Date',
                                              'cloud_cover_seville': 'Cloud cover (%)',
                                              'd_type': ''})
@@ -85,18 +103,18 @@ if page == "Visualizations":
         col1_pres_sev, col2_humi_sev, col3_wind_sev = st.columns(3)
         with col1_pres_sev:
             st.plotly_chart(charts.line_chart(df_combined, 'pressure_msl_seville', 
-                                              'Pressure in Seville', 'Pressure'))
+                                              'Pressure in Seville', 'Pressure', colors))
         
         with col2_humi_sev:
             st.plotly_chart(charts.line_chart(df_combined, 'relative_humidity_2m_seville', 
-                                              'Relative humidity in Seville', 'Humidity'))
+                                              'Relative humidity in Seville', 'Humidity', colors))
         
         with col3_wind_sev:
             fig_wind_sev = px.scatter_polar(df_combined, 
                                             r="wind_speed_10m_seville", theta="wind_direction_10m_seville", 
                                             color="d_type", opacity=0.5,
                                             title='Wind speed and direction',
-                                            color_discrete_map={"Historic": "blue", "Forecast": "red"},
+                                            color_discrete_map={"Historic": colors['historical'], "Forecast": colors['forecast']},
                                             labels={'d_type': ''})
             st.plotly_chart(fig_wind_sev)
         
@@ -112,14 +130,14 @@ if page == "Visualizations":
         var = st.selectbox("Variable", list(vars.keys()))
 
         # Plot of variables vs time
-        fig = px.line(df, y=[x for x in df.columns if vars[var] in x], 
+        fig = px.line(df, x='date', y=[x for x in df.columns if vars[var] in x], 
                     title=var,
                     labels={
                         'date': 'Date',
                         'value': var,
                         'variable': 'City'
                         })
-        st.plotly_chart(fig) 
+        st.plotly_chart(fig)
 
         h_df = pd.read_csv("data/historic_data.csv")
 
@@ -129,7 +147,9 @@ if page == "Visualizations":
         h_df['zone'] = h_df['latitude'].map(loc_dict)
 
         fig_map = px.scatter_mapbox(h_df, lat="latitude", lon="longitude",
-                                color=vars[var], range_color=[h_df[vars[var]].min(), h_df[vars[var]].max()],
+                                color=vars[var], 
+                                color_continuous_scale= list(colors.values())[::-1],
+                                range_color=[h_df[vars[var]].min(), h_df[vars[var]].max()],
                                 animation_frame="date", 
                                 hover_name="zone",
                                 size=vars[var],
@@ -147,8 +167,41 @@ if page == "Visualizations":
         fig_map.update_layout(mapbox_style="carto-positron")
         st.plotly_chart(fig_map, use_container_width=True)
 
+    with tab_data:
+        
+        st.markdown("Data obtained from [Open-meteo](https://open-meteo.com/).")
+        h_d, f_d = pd.read_csv('data/historic_data.csv', index_col=0), pd.read_csv('data/forecast_data.csv', index_col=0)
+        h_col, f_col = st.columns(2)
+        with h_col:
+            st.subheader('Historical data')
+            st.dataframe(h_d)
+        with f_col:
+            st.subheader('Forecast data')
+            st.dataframe(f_d)
+        st.markdown('---')
+        st.subheader('Description of variables - Not all in the data')
+        dh_col, df_col = st.columns(2)
+        with dh_col:
+            st.subheader('Historical data')
+            with open('data/description/historic_description.json', 'r') as f:
+                h_json = json.load(f)
+            st.json(h_json)
+        with df_col:
+            st.subheader('Forecast data')
+            with open('data/description/forecast_description.json', 'r') as f:
+                f_json = json.load(f)
+            st.json(f_json)
+        
+        
+
 elif page == "Predictions":
-    st.header("Predictions")
+    c12, c22 = st.columns([3,1])
+    with c12:
+        st.header("Predictions")
+
+    with c22:
+        theme = st.selectbox("Color palette", list(color_themes.keys()))
+        colors = color_themes[theme]
 
     # --- Model selector ---
     models = {'Linear model': 'linear_model', 
@@ -177,24 +230,24 @@ elif page == "Predictions":
     model_data = pd.read_csv('data/predictions/' + models[model] + '_predictions.csv', index_col=0)
 
     # Real and predicted in same plot
-    st.plotly_chart(charts.model_predictions(model_data, model))
+    st.plotly_chart(charts.model_predictions(model_data, model, colors))
 
     # Most important features of the model
     if model not in ['SARIMA model', 'LSTM model']:
         coefs = pd.Series(model_metrics['importance'], index=model_metrics['features'])
         top_coefs = coefs.abs().nlargest(15).sort_values()
 
-        st.plotly_chart(charts.most_imp_feats(top_coefs, model), use_container_width=True)
+        st.plotly_chart(charts.most_imp_feats(top_coefs, model, colors), use_container_width=True)
 
     # Scatterplot predicted vs real | Residuals
     col1_vs, col2_res = st.columns(2)
     with col1_vs:
 
-        st.plotly_chart(charts.pred_vs_real(model_data, model), use_container_width=True)
+        st.plotly_chart(charts.pred_vs_real(model_data, model, colors), use_container_width=True)
 
     with col2_res:
 
-        st.plotly_chart(charts.residuals(model_data,model), use_container_width=True)
+        st.plotly_chart(charts.residuals(model_data,model, colors), use_container_width=True)
     
     # Show dataframe of predictions
     st.markdown('---')

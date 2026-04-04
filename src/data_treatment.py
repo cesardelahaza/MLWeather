@@ -5,6 +5,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import pandas as pd
 import numpy as np
 
+import json
+
 def save_data():
     h_data, f_data = prepare_data()
 
@@ -68,7 +70,7 @@ def prepare_data():
 
 
 def set_historic_feature_description(data):
-    data.attrs['description'] = {
+    historic_description = {
         'date': 'Time and date',
         'latitude': 'Geographical WGS84 coordinates of the location. Multiple coordinates can be comma separated. E.g. &latitude=52.52,48.85&longitude=13.41,2.35. To return data for multiple locations the JSON output changes to a list of structures. CSV and XLSX formats add a column location_id. For North and South America locations use negative longitudes, because they lie west of Greenwich.',
         'longitude': 'Geographical WGS84 coordinates of the location. Multiple coordinates can be comma separated. E.g. &latitude=52.52,48.85&longitude=13.41,2.35. To return data for multiple locations the JSON output changes to a list of structures. CSV and XLSX formats add a column location_id. For North and South America locations use negative longitudes, because they lie west of Greenwich.',
@@ -104,9 +106,13 @@ def set_historic_feature_description(data):
         'soil_moisture_28_to_100cm': 'Average soil water content as volumetric mixing ratio at 28-100 cm depth. (m^3/m^3)',
         'soil_moisture_100_to_255cm': 'Average soil water content as volumetric mixing ratio at 100-255 cm depth. (m^3/m^3)'
     }
+    data.attrs['description'] = historic_description
+
+    with open('data/description/historic_description.json', 'w') as f:
+        json.dump(historic_description, f)
 
 def set_forecast_feature_description(data):
-    data.attrs['description'] = {
+    forecast_description = {
         'date': 'Time and date',
         'latitude': 'Geographical WGS84 coordinates of the location. Multiple coordinates can be comma separated. E.g. &latitude=52.52,48.85&longitude=13.41,2.35. To return data for multiple locations the JSON output changes to a list of structures. CSV and XLSX formats add a column location_id. For North and South America locations use negative longitudes, because they lie west of Greenwich.',
         'longitude': 'Geographical WGS84 coordinates of the location. Multiple coordinates can be comma separated. E.g. &latitude=52.52,48.85&longitude=13.41,2.35. To return data for multiple locations the JSON output changes to a list of structures. CSV and XLSX formats add a column location_id. For North and South America locations use negative longitudes, because they lie west of Greenwich.',
@@ -153,7 +159,11 @@ def set_forecast_feature_description(data):
         'soil_moisture_3_to_9cm': 'Average soil water content as volumetric mixing ratio at 3-9 cm depth. (m^3/m^3)',
         'soil_moisture_9_to_27cm': 'Average soil water content as volumetric mixing ratio at 9-27 cm depth. (m^3/m^3)',
         'soil_moisture_27_to_81cm': 'Average soil water content as volumetric mixing ratio at 27-81 cm depth. (m^3/m^3)'
-}
+        }
+    data.attrs['description'] = forecast_description
+   
+    with open('data/description/forecast_description.json', 'w') as f:
+        json.dump(forecast_description, f)
     
 def convert_wide_data(data, features):
     """
