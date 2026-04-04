@@ -9,9 +9,6 @@ Results are presented in an interactive Streamlit app.
 ```
 MLWeather/
 │
-└── .streamlit/
-|   └── config.toml
-|
 ├── README.md
 ├── requirements.txt                # Python libraries and versions
 ├── .gitignore
