@@ -9,6 +9,9 @@ Results are presented in an interactive Streamlit app.
 ```
 MLWeather/
 │
+└── .streamlit/
+|   └── config.toml
+|
 ├── README.md
 ├── requirements.txt                # Python libraries and versions
 ├── .gitignore
@@ -64,7 +67,7 @@ MLWeather/
 └── preview/                        # Folder for preview files of the app
 ```
 
-## Preview
+## Preview [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://cesardelahaza-mlweather.streamlit.app)
 
 ### Home page
 
