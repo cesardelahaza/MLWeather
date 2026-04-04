@@ -24,9 +24,6 @@ def sarima_model(target):
                     seasonal_order=(2, 0, 1, 24))
     
     sarima_fit = model.fit(disp=False)
-
-    print("Saving SARIMA model parameters information...")
-    joblib.dump(sarima_fit, 'models/sarima_model_info.pkl')
    
     return sarima_fit, y_train, data['date']
 
@@ -50,6 +47,10 @@ def main():
     print('Predicting values with SARIMA Model...')
     n_steps = len(y_test)
     y_pred = list(s_model.forecast(steps=n_steps))
+
+    print("Saving SARIMA model parameters information...")
+    s_model.remove_data()
+    joblib.dump(s_model, 'models/sarima_model_info.pkl')
 
     print("Saving predictions to data/predictions/sarima_model_predictions.csv")
     pred_df = pd.DataFrame({'date': dates,
