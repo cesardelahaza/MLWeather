@@ -22,13 +22,13 @@ ARIMA is written as ARIMA$(p, d, q)$, where $p$ is the AR order, $d$ the differe
 
 SARIMA (Seasonal ARIMA) extends ARIMA by adding seasonal components. Temperature data, for example, has clear daily and yearly cycles that ARIMA alone cannot capture.
 
-SARIMA is written as ARIMA$(p, d, q)(P, D, Q)_s$, where the second set of parameters mirrors the first but operates at the seasonal lag $s$ (e.g., $s=24$ for hourly data with a daily cycle).
+SARIMA is written as ARIMA $(p, d, q)(P, D, Q)_s$, where the second set of parameters mirrors the first but operates at the seasonal lag $s$ (e.g., $s=24$ for hourly data with a daily cycle).
 
 ### SARIMA for Regression
 
 SARIMA is a purely statistical model: it does not use external features, only the past values of the series itself. It is interpretable and well-suited for univariate forecasting with strong seasonal patterns.
 
-### Key Hyperparameters
+### Some configurable Hyperparameters
 
 | Hyperparameter | Description |
 |---|---|

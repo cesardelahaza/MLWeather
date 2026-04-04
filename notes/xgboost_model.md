@@ -45,7 +45,7 @@ $$\mathcal{L} = \sum_{i=1}^{n}(y_i - \hat{y}_i)^2 + \Omega(f)$$
 
 where $\Omega(f)$ is the regularization term over the tree structure.
 
-### Key hyperparameters
+### Some configurable hyperparameters
 
 | Hyperparameter | Description |
 |---|---|

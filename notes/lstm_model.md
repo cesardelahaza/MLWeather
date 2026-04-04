@@ -24,7 +24,7 @@ This gating mechanism allows the LSTM to retain relevant information over long s
 
 For time series regression, the LSTM receives a sequence of past observations (a sliding window) and outputs a single predicted value. The output layer is a single dense neuron with no activation function (linear output).
 
-### Key Hyperparameters
+### Some configurable Hyperparameters
 
 | Hyperparameter | Description |
 |---|---|

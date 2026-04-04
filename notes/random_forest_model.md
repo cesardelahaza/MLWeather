@@ -1,5 +1,7 @@
 # Random Forest
 
+Some implementation: [here](https://kirenz.github.io/regression/docs/randomforest.html?highlight=random%20forest).
+
 ## Decision Trees
 
 A decision tree is a supervised learning model that splits the data recursively based on feature values, creating a tree structure where each internal node represents a decision rule and each leaf represents a predicted value (in regression, the mean of the samples that reach that leaf).
@@ -25,7 +27,7 @@ For regression, the final prediction is the average of all trees' predictions.
 
 Random Forest naturally supports regression by averaging the outputs of all trees. It is non-parametric, meaning it makes no assumptions about the distribution of the data, and it handles non-linear relationships well.
 
-### Key Hyperparameters
+### Some configurable Hyperparameters
 
 | Hyperparameter | Description |
 |---|---|
